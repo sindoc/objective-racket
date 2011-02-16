@@ -93,13 +93,13 @@
 ;; Exported Abstractions
 ;; ------------------------------------------------------------------------
 (provide
- vector-map!
+ ;vector-map!
  in-range?
  identity
  inc
  dec
  true?
- false?
+ ;false?
  gentext-format-key-val-pair
  gentext-newline
  gentext-println
@@ -107,4 +107,5 @@
  show
  symbol-append
  deep-map
- make-id)
+ make-id
+ any->string)
