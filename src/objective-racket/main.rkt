@@ -24,7 +24,7 @@
      (when (public-class-method? member)
        (members-db-add+ 'public-class-methods member)))
    members)
-    
+  
   (with-syntax
       ((public-class-fields
         #`(begin
@@ -35,27 +35,31 @@
                     ((public static var-name var-value)
                      #'(define var-name var-value)))))))
        (public-class-methods
-        (car (members-db-map+
+        #`(begin
+            #,@(members-db-map+
                 'public-class-methods
                 (λ (member)
+                  (show member)
                   (syntax-case member (public static)
-                    ((public static method-name (method-param ...)
-                             method-body ...)
+                    ((public static method-name method-params method-body ...)
                      #'(define method-name
-                         (λ (method-param ...)
+                         (λ method-params
                            method-body ...))))))))
        )
     #`(begin
         public-class-fields
         public-class-methods
-        'ok)))
+        'done
+        )))
 
 (define-syntax (defclass stx)
   (syntax-case stx ()
     ((defclass name parent . members)
-     #`(define (name)
-         (define meta 'meta)
-         #,(process-members stx (syntax->list #'members))))))
+     (with-syntax 
+         ((meta #'meta))
+       #`(define (name)
+           (define meta 'meta)
+           #,(process-members stx (syntax->list #'members)))))))
 
 (defclass NCard Object
   
@@ -72,10 +76,9 @@
 ;  ;; Public (Static) Methods 
 ;  (public play ()
 ;          (show "Play the card"))
-  
-  (public static all-names-as-list (x)
-          (+ 2 3)
-          (show "Put the name of all cards in a list"))
+
+  (public static foo (x) 
+          (+ 1 2) x)
   
   ;; Private (Static) Methods 
   ;(private check ()

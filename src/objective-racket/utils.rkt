@@ -31,8 +31,7 @@
   (gentext-echo key)
   (gentext-key-val-separator)
   (gentext-space)
-  (gentext-echo val)
-  (gentext-space))
+  (gentext-println val))
   
 ;; Miscellaneous
 ;; ------------------------------------------------------------------------

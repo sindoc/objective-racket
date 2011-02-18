@@ -33,6 +33,7 @@
 
 (define (field-definition? exp)
   (and 
+   (<= (length exp) 2)
    (not (null? (car exp)))
    (not (null? (cadr exp)))))
 
@@ -69,3 +70,4 @@
 ;(public-class-method? #'(public static nr-of 0))
 ;(public-class-method? #'(public static go () x))
 ;(private-class-method? #'(private static go (x) x))
+;(public-class-field? #'(public static foo (x) x))

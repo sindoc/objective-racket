@@ -37,12 +37,13 @@
        (let ((proc (car rest)))
          (hash-map tab proc)))
       ((map+)
-       (let ((fun (car rest))
+       (let ((proc (car rest))
              (match (self 'get key)))
-         (when (not (list? match))
-           (show match)
-           (error "map+ must be used with a bucket list" match))
-         (map fun match)))))
+         (cond 
+           ((not (list? match))
+            '())
+           (else
+            (map proc match)))))))
   (init))
 
 (define-syntax (deftable stx)
