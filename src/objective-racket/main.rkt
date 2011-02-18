@@ -7,29 +7,30 @@
  (for-syntax "check.rkt")
  "utils.rkt"
  "table.rkt")
-
-(define-for-syntax (process-members stx members)
+   
+(define-for-syntax (process-members name members)
   (deftable members-db)
-
-  ;; Public Static Fields
-  (for-each
-   (λ (member)
-     (when (public-class-field? member)
-       (members-db-add+ 'public-class-fields member)))
-   members)
   
-  ;; Public Static Methods
   (for-each
-   (λ (member)
-     (when (public-class-method? member)
-       (members-db-add+ 'public-class-methods member)))
-   members)
+   (λ (qualifier)
+     (for-each
+      (λ (member)
+        (members-db-add+ qualifier member))
+      (filter 
+       (λ (member)
+         (parse-member qualifier member))
+       members)))
+   '(public-class-field?
+     public-class-method?
+     private-class-method?))
+  
+  (members-db-show)
   
   (with-syntax
       ((public-class-fields
         #`(begin
             #,@(members-db-map+
-                'public-class-fields
+                'public-class-field?
                 (λ (member)
                   (syntax-case member (static)
                     ((public static var-name var-value)
@@ -37,19 +38,28 @@
        (public-class-methods
         #`(begin
             #,@(members-db-map+
-                'public-class-methods
+                'public-class-method?
                 (λ (member)
-                  (show member)
                   (syntax-case member (public static)
                     ((public static method-name method-params method-body ...)
                      #'(define method-name
                          (λ method-params
                            method-body ...))))))))
+       (class-dispatcher
+        (make-id name "dispatch-class-~a" name))
        )
     #`(begin
         public-class-fields
         public-class-methods
-        'done
+        (define (init)
+          (set! meta class-dispatcher)
+          meta)
+        (define (class-dispatcher msg . args)
+          (case msg
+            ((name) (object-name #,name))
+            (else
+             (error "Unknown message"))))
+        (init)
         )))
 
 (define-syntax (defclass stx)
@@ -59,7 +69,7 @@
          ((meta #'meta))
        #`(define (name)
            (define meta 'meta)
-           #,(process-members stx (syntax->list #'members)))))))
+           #,(process-members #'name (syntax->list #'members)))))))
 
 (defclass NCard Object
   
@@ -80,11 +90,15 @@
   (public static foo (x) 
           (+ 1 2) x)
   
+  (public static all-names-as-list (x) 
+          (+ 1 2) 
+          (show "Return all names in a list"))
+  
   ;; Private (Static) Methods 
   ;(private check ()
   ;         (show "Checks stuff"))
-  ;(private static all-statuses-as-list ()
-  ;         (show "Put the status of all cards in a list"))
+  (private static all-statuses-as-list ()
+           (show "Put the status of all cards in a list"))
   )
 
 (NCard)

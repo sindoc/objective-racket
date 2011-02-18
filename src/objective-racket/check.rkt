@@ -1,9 +1,13 @@
 #lang racket
 
-(require "utils.rkt")
+(require 
+ (for-syntax "utils.rkt")
+ "utils.rkt")
 (provide
  public-class-method?
- public-class-field?)
+ public-class-field?
+ private-class-method?
+ parse-member)
 
 (define (handler exn) #f)
 (define-syntax (check stx)
@@ -65,6 +69,14 @@
    (static? member)
    (method-definition?
     (after-scope member))))
+
+(define-syntax (parse-member stx)
+  (syntax-case stx ()
+    ((parse-member qualifier member)
+     (with-syntax
+         ((pred 
+           (datum->syntax stx #'qualifier)))
+       #`(apply (eval pred) (list member))))))
 
 ;(public-class-field? #'(public static nr-of 0))
 ;(public-class-method? #'(public static nr-of 0))
