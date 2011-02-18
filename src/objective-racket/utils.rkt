@@ -107,5 +107,4 @@
  show
  symbol-append
  deep-map
- make-id
- any->string)
+ make-id)
