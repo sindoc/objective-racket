@@ -8,11 +8,27 @@
  "utils.rkt"
  "table-stx.rkt")
 
+(define-for-syntax *member-ids*
+  '(public-class-field?
+    public-class-method?
+    private-class-method?))
+
 (define-syntax (defclass stx)
   (deftable members-db)
   (syntax-case stx ()
     ((defclass class parent . members)
-
+     (begin
+       (for-each
+        (λ (member-id)
+          (for-each
+           (λ (member)
+             (members-db-add+ member-id member))
+           (filter 
+            (λ (member)
+              (parse-member member-id member))
+            (syntax->list #'members))))
+        *member-ids*)
+       (members-db-show))
      (with-syntax
          ((meta-dispatch (make-id #'class "dispatch-~a" #'class))
           (class-name #''class)
