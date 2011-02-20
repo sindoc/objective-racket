@@ -7,69 +7,67 @@
  (for-syntax "check.rkt")
  "utils.rkt"
  "table.rkt")
-   
+
+(define-for-syntax *member-ids*
+  '(public-class-field?
+    public-class-method?
+    private-class-method?))
+
+(define-for-syntax (bind-public-class-methods member)
+  (syntax-case member (public static)
+    ((public static method-name method-params method-body ...)
+     #'(define method-name
+         (λ method-params
+           method-body ...)))))
+
+(define-for-syntax (bind-public-class-fields member)
+  (syntax-case member (public static)
+    ((public static var-name var-value)
+     #'(define var-name var-value))))
+
 (define-for-syntax (process-members name members)
   (deftable members-db)
   
+  ;; Class member definitions can appear in any order. Here, we order them.
   (for-each
-   (λ (qualifier)
+   (λ (member-id)
      (for-each
       (λ (member)
-        (members-db-add+ qualifier member))
+        (members-db-add+ member-id member))
       (filter 
        (λ (member)
-         (parse-member qualifier member))
+         (parse-member member-id member))
        members)))
-   '(public-class-field?
-     public-class-method?
-     private-class-method?))
+   *member-ids*)
   
-  (members-db-show)
-  
-  (with-syntax
-      ((public-class-fields
-        #`(begin
-            #,@(members-db-map+
-                'public-class-field?
-                (λ (member)
-                  (syntax-case member (static)
-                    ((public static var-name var-value)
-                     #'(define var-name var-value)))))))
-       (public-class-methods
-        #`(begin
-            #,@(members-db-map+
-                'public-class-method?
-                (λ (member)
-                  (syntax-case member (public static)
-                    ((public static method-name method-params method-body ...)
-                     #'(define method-name
-                         (λ method-params
-                           method-body ...))))))))
-       (class-dispatcher
-        (make-id name "dispatch-class-~a" name))
-       )
-    #`(begin
-        public-class-fields
-        public-class-methods
-        (define (init)
-          (set! meta class-dispatcher)
-          meta)
-        (define (class-dispatcher msg . args)
-          (case msg
-            ((name) (object-name #,name))
-            (else
-             (error "Unknown message"))))
-        (init)
-        )))
+  (let ((def-public-class-fields
+          (members-db-map+ 'public-class-field? bind-public-class-fields))
+        (def-public-class-methods
+          (members-db-map+ 'public-class-method? bind-public-class-methods)))
+    (with-syntax
+        ((class-dispatcher
+          (make-id name "dispatch-class-~a" name)))
+      #`(begin
+          #,@def-public-class-fields
+          #,@def-public-class-methods
+          (define (init)
+            (set! meta class-dispatcher)
+            meta)
+          (define (class-dispatcher msg . args)
+            (case msg
+              ((name) (object-name #,name))
+              (else
+               (error "Unknown message to class dispatcher" msg))))
+          (init)
+          'ok
+          ))))
 
 (define-syntax (defclass stx)
   (syntax-case stx ()
     ((defclass name parent . members)
-     (with-syntax 
-         ((meta #'meta))
-       #`(define (name)
-           (define meta 'meta)
-           #,(process-members #'name (syntax->list #'members)))))))
+     #`(define (name)
+         (define meta 'meta)
+         #,(process-members #'name (syntax->list #'members))))))
 
 (defclass NCard Object
   
@@ -88,7 +86,8 @@
 ;          (show "Play the card"))
 
   (public static foo (x) 
-          (+ 1 2) x)
+          (+ 1 2) 
+          x)
   
   (public static all-names-as-list (x) 
           (+ 1 2) 
