@@ -1,10 +1,8 @@
 #lang racket
 
-(require 
- "utils.ss"
- (for-syntax "utils.rkt"))
+(require "utils.rkt")
 
-(provide deftable)
+(provide make-dict)
 
 (define (make-dict name)
   (define self '())
@@ -45,22 +43,3 @@
            (else
             (map proc match)))))))
   (init))
-
-(define-syntax (deftable stx)
-  (syntax-case stx ()
-    ((_ name)
-     (with-syntax 
-         ((name-add  (make-id stx "~a-add"  #'name))
-          (name-add+ (make-id stx "~a-add+" #'name))
-          (name-get  (make-id stx "~a-get"  #'name))
-          (name-map  (make-id stx "~a-map"  #'name))
-          (name-map+ (make-id stx "~a-map+" #'name))
-          (name-show (make-id stx "~a-show" #'name)))
-       #'(begin
-           (define name (make-dict 'name))
-           (define (name-add  k v) (name 'add  k v))
-           (define (name-add+ k v) (name 'add+ k v))
-           (define (name-get  k  ) (name 'get  k))
-           (define (name-map  f  ) (name 'map  f))
-           (define (name-map+ k f) (name 'map+ k f))
-           (define (name-show    ) (name 'show void)))))))
