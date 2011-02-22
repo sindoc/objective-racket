@@ -7,24 +7,33 @@
 (provide (all-defined-out))
 
 (define-for-syntax *member-qualifiers* '())
+(define-for-syntax *member-qualifier-matchers* '())
 
 (define-syntax (def-member-qualifier stx)
   (syntax-case stx ()
-    ((_ id (op val) ...)
+    ((_ id (matcher matcher-expr))
      (with-syntax
          ((qualifier 
            (make-id #'id "~a" #'id))
           (qualifier-dispatcher 
            (make-id #'id "dispatch-~a" #'id))
-          (qualifier-name #''id))
+          (qualifier-name #''id)
+          (qualifier-matcher
+           (make-id #'id "~a-matcher" #'id)))
+       
        (set! *member-qualifiers* 
              (cons #'id *member-qualifiers*))
+       (set! *member-qualifier-matchers*
+             (cons (cadr (syntax->list #'matcher-expr))
+                   *member-qualifier-matchers*))
        #'(begin
+           (define-syntax (qualifier-matcher stx)
+             (syntax-case stx ()
+               (qualifier-matcher (datum->syntax stx matcher-expr))))
            (define (qualifier member)
              (define (qualifier-dispatcher msg . args)
                (case msg
                  ((name) qualifier-name)
-                 ((op) val) ...
                  (else
                   (error qualifier-name "unknown message (~a) to ~a"
                          msg "to class member qualifier"))))
@@ -44,28 +53,19 @@
      #`(with-handlers 
            ((exn:fail? ; FIXME: too general
              (λ (exn)
-               (error 
+               (show 
                 'unqualified-class-member 
                 "Invalid class member \n ~a" exn))))
-         #,@(map
-             (λ (q)
-               #`(define #,(make-id q matcher-id q) ((#,q member) 'matcher)))
-             *member-qualifiers*)
-         (syntax-case member (static)
+         (syntax-case member ()
            #,@(map
-               (λ (q)
-                 #`(#,(make-id q matcher-id q)
-                    (#,q member)))
-               *member-qualifiers*))))))
+               (λ (qualifier matcher)
+                 #`((#,@matcher)
+                    (#,qualifier member)))
+               *member-qualifiers*
+               *member-qualifier-matchers*))))))
 
 (define test-1
-  (qualify-member #'(public static test-1 1)))
+  (qualify-member #'(public static a 1)))
 
-(define field (pattern (public static var-name var-value)))
-(define method (pattern (public static method-name method-params method-body)))
-
-(syntax-case #'(public static n 1) ()
-  (method
-   (show 'method))
-  (field
-   (show 'field)))
+(define test-2
+  (qualify-member #'(public static b (x) x)))
