@@ -26,16 +26,14 @@
        (set! *member-qualifier-matchers*
              (cons (cadr (syntax->list #'matcher-expr))
                    *member-qualifier-matchers*))
-       #'(begin
-           (define (qualifier member)
-             (define (qualifier-dispatcher msg . args)
-               (case msg
-                 ((name) qualifier-name)
-                 (else
-                  (error qualifier-name "unknown message (~a) to ~a"
-                         msg "to class member qualifier"))))
-             qualifier-dispatcher)
-           )))))
+       #'(define (qualifier member)
+           (define (qualifier-dispatcher msg . args)
+             (case msg
+               ((name) qualifier-name)
+               (else
+                (error qualifier-name "unknown message (~a) to ~a"
+                       msg "to class member qualifier"))))
+           qualifier-dispatcher)))))
 
 (def-member-qualifier public-class-field
   (matcher '(public static var-name var-value)))
