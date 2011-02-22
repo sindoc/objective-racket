@@ -27,9 +27,6 @@
              (cons (cadr (syntax->list #'matcher-expr))
                    *member-qualifier-matchers*))
        #'(begin
-           (define-syntax (qualifier-matcher stx)
-             (syntax-case stx ()
-               (qualifier-matcher (datum->syntax stx matcher-expr))))
            (define (qualifier member)
              (define (qualifier-dispatcher msg . args)
                (case msg
@@ -65,7 +62,7 @@
                *member-qualifier-matchers*))))))
 
 (define test-1
-  (qualify-member #'(public static a 1)))
+  (qualify-member #'(public static n-accounts 1)))
 
 (define test-2
   (qualify-member #'(public static b (x) x)))
