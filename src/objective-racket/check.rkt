@@ -26,6 +26,9 @@
        (set! *member-qualifier-matchers*
              (cons (cadr (syntax->list #'matcher-expr))
                    *member-qualifier-matchers*))
+       
+       (show *member-qualifiers*)
+       
        #'(define (qualifier member)
            (define (qualifier-dispatcher msg . args)
              (case msg
@@ -42,7 +45,6 @@
   (matcher '(public static method-name method-params method-body)))
 
 (define-syntax (qualify-member stx)
-  (define matcher-id "~a-matcher")
   (syntax-case stx ()
     ((_ member)
      #`(with-handlers 
@@ -60,7 +62,7 @@
                *member-qualifier-matchers*))))))
 
 (define test-1
-  (qualify-member #'(public static n-accounts 1)))
+  (qualify-member #'(public static a 1)))
 
 (define test-2
   (qualify-member #'(public static b (x) x)))
