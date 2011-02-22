@@ -5,32 +5,31 @@
  (for-syntax "utils.rkt")
  (for-syntax "table-stx.rkt")
  (for-syntax "check.rkt")
- "utils.rkt"
- "table-stx.rkt")
+ "utils.rkt")
 
-(define-for-syntax *member-ids*
-  '(public-class-field?
-    public-class-method?
-    private-class-method?))
+(define-for-syntax (bind-public-class-fields member)
+  (syntax-case member (public static)
+    ((public static var-name var-value)
+     #'(define var-name var-value))))
 
 (define-syntax (defclass stx)
   (deftable members-db)
   (syntax-case stx ()
     ((defclass class parent . members)
      (begin
-       (for-each
-        (λ (member-id)
-          (for-each
-           (λ (member)
-             (members-db-add+ member-id member))
-           (filter 
-            (λ (member)
-              (parse-member member-id member))
-            (syntax->list #'members))))
-        *member-ids*)
+       (for-each 
+        (λ (member)
+          (define member-object (qualify-member member))
+          (members-db-add+ (member-object 'name) member-object))
+        (syntax->list #'members))
        (members-db-show))
      (with-syntax
-         ((meta-dispatch (make-id #'class "dispatch-~a" #'class))
+         ((def-public-class-fields
+            #`(begin
+                #,@(members-db-map+ 
+                    'public-class-field 
+                    bind-public-class-fields)))
+          (meta-dispatch (make-id #'class "dispatch-~a" #'class))
           (class-name #''class)
           )
        #`(define (class)
@@ -38,6 +37,7 @@
            (define (meta-init)
              (set! meta meta-dispatch)
              meta)
+           def-public-class-fields
            (define (meta-dispatch meta-msg)
              (case meta-msg
                ((name) class-name)
@@ -46,9 +46,9 @@
            (meta-init)
            )))))
 
-(defclass NCard Object
-  (public static number-of-cards 0)
+(defclass Account Object
+  (public static n-accounts 1)
+  (public static total-funds 1)
   )
 
-((NCard) 'name)
-;((NCard) 'foo)
+((Account) 'name)
