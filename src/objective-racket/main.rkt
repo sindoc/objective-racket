@@ -7,11 +7,6 @@
  (for-syntax "check.rkt")
  "utils.rkt")
 
-(define-for-syntax (bind-public-class-fields member)
-  (syntax-case member (public static)
-    ((public static var-name var-value)
-     #'(define var-name var-value))))
-
 (define-syntax (defclass stx)
   (deftable members-db)
   (syntax-case stx ()
@@ -20,18 +15,17 @@
        (for-each 
         (λ (member)
           (define member-object (qualify-member member))
+          (show (member-object 'name))
           (members-db-add+ (member-object 'name) member-object))
-        (syntax->list #'members))
-       (members-db-show))
+        (syntax->list #'members)))
      (with-syntax
          ((def-public-class-fields
             #`(begin
                 #,@(members-db-map+ 
                     'public-class-field 
-                    bind-public-class-fields)))
+                    identity)))
           (meta-dispatch (make-id #'class "dispatch-~a" #'class))
-          (class-name #''class)
-          )
+          (class-name #''class))
        #`(define (class)
            (define meta void)
            (define (meta-init)
@@ -49,6 +43,6 @@
 (defclass Account Object
   (public static n-accounts 1)
   (public static total-funds 1)
-  )
+  (public static fun (x) x))
 
 ((Account) 'name)
