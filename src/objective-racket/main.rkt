@@ -15,7 +15,6 @@
        (for-each 
         (λ (member)
           (define member-object (qualify-member member))
-          (show (member-object 'name))
           (members-db-add+ (member-object 'name) member-object))
         (syntax->list #'members)))
      (with-syntax
@@ -23,7 +22,8 @@
             #`(begin
                 #,@(members-db-map+ 
                     'public-class-field 
-                    identity)))
+                    (λ (mo)
+                      (mo 'binder)))))
           (meta-dispatch (make-id #'class "dispatch-~a" #'class))
           (class-name #''class))
        #`(define (class)
