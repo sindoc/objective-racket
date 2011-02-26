@@ -43,12 +43,12 @@
                #,@(members-db-map+ 'private-class-field field-dispatcher)
                (else
                 (error class-name "unknown message ~a" meta-msg))))
-           (meta-init)
-           )))))
+           (meta-init))))))
 
 (defclass Account Object
-  (public static n-accounts 1)
+  (public static n-accounts 0)
   (public static total-funds 1)
-  (public static fun (x) x))
+  (public static fun (x) x)
+  (private static total-corporate-funds 2))
 
-((Account) 'name)
+((Account) 'total-funds)

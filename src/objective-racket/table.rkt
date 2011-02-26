@@ -19,13 +19,11 @@
          entry))
       ((add)
        (let ((value (car rest)))
-         ;(show "Adding value:" value "for entry:" key "to table:" name)
          (hash-set! tab key value)))
       ((add+)
        (let ((value (car rest)))
          (unless (self 'get key)
            (self 'add key null))
-         ;(show "Adding value:" value "for bucket entry:" key "to table:" name)
          (hash-set! 
           tab key
           (cons value (self 'get key)))))
@@ -39,7 +37,7 @@
              (match (self 'get key)))
          (cond 
            ((not (list? match))
-            '())
+            null)
            (else
             (map proc match)))))))
   (init))
