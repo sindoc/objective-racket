@@ -17,7 +17,8 @@
                (show 
                 'unqualified-class-member 
                 "Invalid class member \n ~a" exn))))
-         (syntax-case member ()
+         (show member)
+         (syntax-case member (public private static)
            #,@(map
                (λ (qualifier matcher)
                  #`((#,@matcher)
