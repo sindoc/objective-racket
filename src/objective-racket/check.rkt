@@ -10,7 +10,7 @@
 
 (define-syntax (qualify-member stx)
   (syntax-case stx ()
-    ((_ member)
+    ((qualify-member member)
      #`(with-handlers 
            ((exn:fail? ; FIXME: too general
              (λ (exn)
@@ -18,7 +18,7 @@
                 'unqualified-class-member 
                 "Invalid class member \n ~a" exn))))
          (show member)
-         (syntax-case member (public private static)
+         (syntax-case member #,*member-keywords*
            #,@(map
                (λ (qualifier matcher)
                  #`((#,@matcher)
