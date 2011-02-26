@@ -47,14 +47,25 @@
                          msg "to class member qualifier"))))
              qualifier-dispatcher))))))
 
+(define (common-field-binder member)
+  (let* ((as-list (syntax->datum member))
+         (var-name (caddr as-list))
+         (var-value (cadddr as-list)))
+    `(define ,var-name ,var-value)))
+
+(define (common-field-caller member)
+  (let* ((as-list (syntax->datum member)))
+    (caddr as-list)))
+
 (def-member-qualifier public-class-field
   (matcher '(public static var-name var-value))
-  (binder
-   (λ (member)
-     (let* ((as-list (syntax->datum member))
-            (var-name (caddr as-list))
-            (var-value (cadddr as-list)))
-       `(define ,var-name ,var-value)))))
+  (binder common-field-binder)
+  (caller common-field-caller))
 
+(def-member-qualifier private-class-field
+  (matcher '(private static var-name var-value))
+  (binder common-field-binder)
+  (caller common-field-caller))
+  
 (def-member-qualifier public-class-method
   (matcher '(public static method-name method-params method-body)))
