@@ -1,6 +1,6 @@
 #lang racket
 
-(require "utils.rkt")
+(require "main.rkt")
 
 (provide make-dict)
 

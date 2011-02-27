@@ -1,11 +1,11 @@
 #lang racket
 
 (require 
- (for-syntax "utils.rkt")
- (for-syntax "table-stx.rkt")
+ (for-syntax "utils/main.rkt")
+ (for-syntax "utils/table-stx.rkt")
  (for-syntax "member-dispatcher.rkt")
- "table-stx.rkt"
- "utils.rkt")
+ "utils/table-stx.rkt"
+ "utils/main.rkt")
 
 (deftable-for-syntax members-db)
 

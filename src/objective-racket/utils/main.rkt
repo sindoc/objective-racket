@@ -1,5 +1,7 @@
 #lang racket
 
+(provide (all-defined-out))
+
 ;; Gentext
 ;; ------------------------------------------------------------------------
 
@@ -36,32 +38,7 @@
 ;; Miscellaneous
 ;; ------------------------------------------------------------------------
 
-(define (vector-map! v f)
-  (define last (- (vector-length v) 1))
-  (let loop
-    ((i 0))
-    (vector-set! v i (f i (vector-ref v i)))
-    (unless (>= i last)
-      (loop (+ i 1))))
-  v)
-
-(define (true? pred)
-  (eq? pred #t))
-(define (false? pred)
-  (eq? pred #f))
-
 (define (identity x) x)
-
-(define (inc n)
-  (+ n 1))
-(define (dec n)
-  (- n 1))
-
-(define (in-range? step start end)
-  (cond
-    ((and (>= step start)
-          (<= step end)) #t)
-    (else #f)))
 
 (define show gentext-println)
 
@@ -88,22 +65,3 @@
    stx 
    (string->symbol 
     (apply format template (map syntax->datum ids)))))
-
-;; Exported Abstractions
-;; ------------------------------------------------------------------------
-(provide
- ;vector-map!
- in-range?
- identity
- inc
- dec
- true?
- ;false?
- gentext-format-key-val-pair
- gentext-newline
- gentext-println
- gentext-fancy-line
- show
- symbol-append
- deep-map
- make-id)
