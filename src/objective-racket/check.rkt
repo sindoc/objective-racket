@@ -1,6 +1,7 @@
 #lang racket
 
 (require 
+ (for-template racket)
  (for-syntax "members.rkt")
  (for-syntax "utils.rkt")
  "members.rkt"
