@@ -3,7 +3,7 @@
 (require 
  (for-syntax "utils.rkt")
  (for-syntax "table-stx.rkt")
- (for-syntax "check.rkt")
+ (for-syntax "member-dispatcher.rkt")
  "table-stx.rkt"
  "utils.rkt")
 
