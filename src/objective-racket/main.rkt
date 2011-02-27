@@ -1,7 +1,6 @@
 #lang racket
 
 (require 
- (for-syntax racket)
  (for-syntax "utils.rkt")
  (for-syntax "table-stx.rkt")
  (for-syntax "check.rkt")
