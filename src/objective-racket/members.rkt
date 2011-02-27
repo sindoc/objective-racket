@@ -3,7 +3,8 @@
 (require
  "table-stx.rkt"
  (for-syntax "utils.rkt")
- (for-syntax racket))
+ (for-syntax racket)
+ (for-template racket))
 
 (provide 
  (all-defined-out)
@@ -14,13 +15,21 @@
 (define-for-syntax *member-qualifier-matchers* null)
 (define-for-syntax *member-keywords* null)
 
-(deftable-for-syntax member-objects)
+(define-for-syntax *ldots* '~ldots)
 
+(define-for-syntax (replace-specials stx)
+  (map
+   (λ (x)
+     (case x
+       ((*ldots*) '...)
+       (else x)))
+   (syntax->datum stx)))
+  
 (define-for-syntax (add-qualifier! id matcher keywords)
   (set! *member-qualifiers* 
         (cons id *member-qualifiers*))
   (set! *member-qualifier-matchers*
-        (cons (cadr (syntax->list matcher))
+        (cons (replace-specials (cadr (syntax->list matcher)))
               *member-qualifier-matchers*))
   (set! *member-keywords*
         (remove-duplicates
@@ -56,26 +65,31 @@
 
 (define (common-field-binder member)
   (let* ((as-list (syntax->datum member))
-         (var-name (caddr as-list))
-         (var-value (cadddr as-list)))
+         (var-name (cadddr as-list))
+         (var-value (car (cddddr as-list))))
     `(define ,var-name ,var-value)))
 
 (define (common-field-caller member)
   (let* ((as-list (syntax->datum member)))
-    (caddr as-list)))
+    (cadddr as-list)))
 
-(def-member-qualifier public-class-field
-  (matcher '(public static var-name var-value)
-           '(public static))
+(def-member-qualifier 
+  public-class-field
+  (matcher 
+   '(public static field var-name var-value)
+   '(public static field))
   (binder common-field-binder)
   (caller common-field-caller))
 
-(def-member-qualifier private-class-field
-  (matcher '(private static var-name var-value)
-           '(private static))
+(def-member-qualifier 
+  private-class-field
+  (matcher 
+   '(private static field var-name var-value)
+   '(private static field))
   (binder common-field-binder)
   (caller common-field-caller))
-  
+
 (def-member-qualifier public-class-method
-  (matcher '(public static method-name method-params method-body)
-           '(public static)))
+  (matcher 
+   '(public static method method-name method-params method-body *ldots*)
+   '(public static method)))

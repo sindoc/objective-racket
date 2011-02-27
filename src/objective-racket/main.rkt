@@ -26,6 +26,8 @@
       (syntax->list #'members))
      (with-syntax
          ((def-public-class-fields
+            (gen-member (λ (mo) (mo 'binder)) 'public-class-field))
+          (def-private-class-fields
             (gen-member (λ (mo) (mo 'binder)) 'private-class-field))
           (meta-dispatch 
            (make-id #'class "dispatch-~a" #'class))
@@ -36,18 +38,20 @@
              (set! meta meta-dispatch)
              meta)
            def-public-class-fields
+           def-private-class-fields
            (define (meta-dispatch meta-msg)
              (case meta-msg
                ((name) class-name)
-               #,@(members-db-map+ 'private-class-field field-dispatcher)
+               #,@(members-db-map+ 'public-class-field field-dispatcher)
                (else
                 (error class-name "unknown message ~a" meta-msg))))
            (meta-init))))))
 
 (defclass Account Object
-  (public static n-accounts 0)
-  (public static total-funds 1)
-  (public static fun (x) x)
-  (private static total-corporate-funds 2))
+  (public static field n-accounts 0)
+  (private static field total-funds 1)
+  (public static method fun (x) x)
+  (private static field total-corporate-funds 2))
 
-((Account) 'total-funds)
+(define acc (Account))
+(acc 'n-accounts)

@@ -13,12 +13,11 @@
   (syntax-case stx ()
     ((qualify-member member)
      #`(with-handlers 
-           ((exn:fail? ; FIXME: too general
+           ((exn:fail?
              (λ (exn)
                (error
                 'unqualified-class-member 
                 "Invalid class member \n ~a" exn))))
-         (show member)
          (syntax-case member #,*member-keywords*
            #,@(map
                (λ (qualifier matcher)
@@ -27,13 +26,20 @@
                *member-qualifiers*
                *member-qualifier-matchers*))))))
 
-(define test-1
-  (qualify-member #'(public static a 1)))
-
-(define test-2
-  (qualify-member #'(public static b (x) x)))
-
-(define test-3
-  (qualify-member #'(private static c 10)))
-
-(list test-1 test-2 test-3)
+;(define test-1
+;  (qualify-member 
+;   #'(public static field a 1)))
+;
+;(define test-2
+;  (qualify-member 
+;   #'(public 
+;       static 
+;       method
+;       b (x)
+;       (define y (+ x y))
+;       y)))
+;
+;(define test-3
+;  (qualify-member #'(private static field c 10)))
+;
+;(list test-1 test-2 test-3)
