@@ -7,6 +7,8 @@
  "utils/table-stx.rkt"
  "utils/main.rkt")
 
+(provide defclass)
+
 (deftable-for-syntax members-db)
 
 (define-for-syntax (gen-member proc key #:wrapper [wrap #'begin])
@@ -54,12 +56,3 @@
                (else
                 (error class-name "unknown message ~a" meta-msg))))
            (meta-init))))))
-
-(defclass Account Object
-  (public static field n-accounts 0)
-  (private static field total-funds 1)
-  (public static method fun (x) x)
-  (private static field total-corporate-funds 2))
-
-(define acc (Account))
-(acc 'n-accounts)
