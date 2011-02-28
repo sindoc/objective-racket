@@ -13,11 +13,11 @@
   #`(#,wrap #,@(members-db-map+ key proc)))
 
 (define-for-syntax (field-dispatcher member-object)
-  (let ((ref (mo 'caller)))
+  (let ((ref (member-object 'caller)))
     #`((#,ref) #,ref)))
 
-(define (get-binder member-object)
-  (mo 'binder))
+(define-for-syntax (get-binder member-object)
+  (member-object 'binder))
 
 (define-syntax (defclass stx)
   (syntax-case stx ()
