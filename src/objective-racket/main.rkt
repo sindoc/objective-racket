@@ -30,6 +30,8 @@
             (gen-member (λ (mo) (mo 'binder)) 'public-class-field))
           (bind-private-class-fields
             (gen-member (λ (mo) (mo 'binder)) 'private-class-field))
+          (bind-public-class-methods
+           (gen-member (λ (mo) (mo 'binder)) 'public-class-method))
           (meta-dispatch 
            (make-id #'class "dispatch-~a" #'class))
           (class-name #''class))
@@ -40,10 +42,12 @@
              meta)
            bind-public-class-fields
            bind-private-class-fields
+           bind-public-class-methods
            (define (meta-dispatch meta-msg)
              (case meta-msg
                ((name) class-name)
                #,@(members-db-map+ 'public-class-field field-dispatcher)
+               #,@(members-db-map+ 'public-class-method field-dispatcher)
                (else
                 (error class-name "unknown message ~a" meta-msg))))
            (meta-init))))))

@@ -24,6 +24,18 @@
     ((_ _ _ var-name _)
      #'var-name)))
 
+(define (common-method-binder member)
+  (syntax-case member ()
+    ((_ _ _ method-name method-params method-body ...)
+     #'(define method-name 
+         (λ method-params
+           method-body ...)))))
+
+(define (common-method-caller member)
+  (syntax-case member ()
+    ((_ _ _ method-name etc ...)
+     #'method-name)))
+
 (def-member-qualifier 
   public-class-field
   (matcher 
@@ -43,4 +55,6 @@
 (def-member-qualifier public-class-method
   (matcher 
    '(public static method method-name method-params method-body *ldots*)
-   '(public static method)))
+   '(public static method))
+  (binder common-method-binder)
+  (caller common-method-caller))
