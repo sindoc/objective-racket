@@ -39,18 +39,35 @@
            (gen-member get-binder 'public-class-method))
           (bind-private-class-methods
            (gen-member get-binder 'private-class-method))
+          (object 
+           (make-id #'class "~a-instance" #'class))
+          (object-dispatch
+           (make-id #'class "dispatch-~a-instance" #'class))
           (meta-dispatch 
            (make-id #'class "dispatch-~a" #'class))
           (class-name #''class))
        #`(define (class)
-           (define meta void)
-           (define (meta-init)
+           (define meta null)
+           (define (init-meta)
              (set! meta meta-dispatch)
              meta)
            bind-public-class-fields
            bind-private-class-fields
            bind-public-class-methods
            bind-private-class-methods
+           (define (object)
+             (define self null)
+             (define (init-object)
+               (set! self object-dispatch)
+               self)
+             (define (object-dispatch msg)
+               (case msg
+                 ((meta) meta)
+                 (else
+                  (error 
+                   class-name "unknown message ~a to an instance of ~a" 
+                   msg class-name))))
+             (init-object))
            (define (meta-dispatch meta-msg)
              (case meta-msg
                ((name) class-name)
@@ -58,4 +75,4 @@
                #,@(members-db-map+ 'public-class-method field-dispatcher)
                (else
                 (error class-name "unknown message ~a" meta-msg))))
-           (meta-init))))))
+           (init-meta))))))
