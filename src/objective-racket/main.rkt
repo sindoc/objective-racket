@@ -12,7 +12,7 @@
 (deftable-for-syntax members-db)
 
 (define-for-syntax (gen-member proc key #:wrapper [wrap #'begin])
-  #`(#,wrap #,@(members-db-map+ key proc)))
+  #`(#,wrap #,@(reverse (members-db-map+ key proc))))
 
 (define-for-syntax (field-dispatcher member-object)
   (let ((ref (member-object 'caller)))
@@ -28,17 +28,12 @@
        (for-each 
         (λ (member)
           (define member-object (qualify-member member))
-          (members-db-add+ (member-object 'name) member-object))
+          (members-db-add+ (member-object 'name) member-object)
+          (members-db-add+ (member-object 'scope) member-object))
         (syntax->list #'members)))
      (with-syntax
-         ((bind-public-class-fields
-            (gen-member get-binder 'public-class-field))
-          (bind-private-class-fields
-            (gen-member get-binder 'private-class-field))
-          (bind-public-class-methods
-           (gen-member get-binder 'public-class-method))
-          (bind-private-class-methods
-           (gen-member get-binder 'private-class-method))
+         ((bind-class-fields
+           (gen-member get-binder 'static))
           (object 
            (make-id #'class "~a-instance" #'class))
           (object-dispatch
@@ -51,10 +46,7 @@
            (define (init-meta)
              (set! meta meta-dispatch)
              meta)
-           bind-public-class-fields
-           bind-private-class-fields
-           bind-public-class-methods
-           bind-private-class-methods
+           bind-class-fields
            (define (object)
              (define self null)
              (define (init-object)
