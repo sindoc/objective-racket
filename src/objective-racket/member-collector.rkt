@@ -16,19 +16,20 @@
 
 (define-for-syntax *ldots* '~ldots)
 
-(define-for-syntax (replace-specials stx)
+(define-for-syntax (replace-specials lst)
   (map
    (λ (x)
      (case x
        ((*ldots*) '...)
        (else x)))
-   (syntax->datum stx)))
+   lst))
   
 (define-for-syntax (add-qualifier! id matcher keywords)
   (set! *member-qualifiers* 
         (cons id *member-qualifiers*))
   (set! *member-qualifier-matchers*
-        (cons (replace-specials (cadr (syntax->list matcher)))
+        (cons (replace-specials 
+               (syntax->datum (cadr (syntax->list matcher))))
               *member-qualifier-matchers*))
   (set! *member-keywords*
         (remove-duplicates
