@@ -8,12 +8,6 @@
  (for-syntax *member-qualifier-matchers*)
  (for-syntax *member-keywords*))
 
-;(define (common-field-binder member)
-;  (let* ((as-list (syntax->datum member))
-;         (var-name (cadddr as-list))
-;         (var-value (car (cddddr as-list))))
-;    `(define ,var-name ,var-value)))
-
 (define (common-field-binder member)
   (syntax-case member ()
     ((_ _ _ var-name var-value)
