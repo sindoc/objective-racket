@@ -21,12 +21,11 @@
        (let ((value (car rest)))
          (hash-set! tab key value)))
       ((add+)
-       (let ((value (car rest)))
-         (unless (self 'get key)
-           (self 'add key null))
-         (hash-set! 
-          tab key
-          (cons value (self 'get key)))))
+       (let ((curr (self 'get key))
+             (value (car rest)))
+         (let ((new-value 
+                (cons value (if curr curr null))))
+           (hash-set! tab key new-value))))
       ((show)
        (hash-map tab gentext-format-key-val-pair))
       ((map) 
