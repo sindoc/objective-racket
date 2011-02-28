@@ -19,15 +19,16 @@
 (define-syntax (defclass stx)
   (syntax-case stx ()
     ((defclass class parent . members)
-     (for-each 
-      (λ (member)
-        (define member-object (qualify-member member))
-        (members-db-add+ (member-object 'name) member-object))
-      (syntax->list #'members))
+     (begin
+       (for-each 
+        (λ (member)
+          (define member-object (qualify-member member))
+          (members-db-add+ (member-object 'name) member-object))
+        (syntax->list #'members)))
      (with-syntax
-         ((def-public-class-fields
+         ((bind-public-class-fields
             (gen-member (λ (mo) (mo 'binder)) 'public-class-field))
-          (def-private-class-fields
+          (bind-private-class-fields
             (gen-member (λ (mo) (mo 'binder)) 'private-class-field))
           (meta-dispatch 
            (make-id #'class "dispatch-~a" #'class))
@@ -37,8 +38,8 @@
            (define (meta-init)
              (set! meta meta-dispatch)
              meta)
-           def-public-class-fields
-           def-private-class-fields
+           bind-public-class-fields
+           bind-private-class-fields
            (define (meta-dispatch meta-msg)
              (case meta-msg
                ((name) class-name)

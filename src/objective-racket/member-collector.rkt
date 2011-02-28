@@ -55,8 +55,10 @@
                (case msg
                  ((name) qualifier-name)
                  ((member) member)
-                 ((action-id) 
-                  (apply action (list member))) ...
+                 ((action-id)
+                  (datum->syntax
+                   member
+                   (syntax->datum (apply action (list member))))) ...
                  (else
                   (error qualifier-name "unknown message (~a) to ~a"
                          msg "to class member qualifier"))))
