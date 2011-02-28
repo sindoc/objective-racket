@@ -37,6 +37,8 @@
             (gen-member get-binder 'private-class-field))
           (bind-public-class-methods
            (gen-member get-binder 'public-class-method))
+          (bind-private-class-methods
+           (gen-member get-binder 'private-class-method))
           (meta-dispatch 
            (make-id #'class "dispatch-~a" #'class))
           (class-name #''class))
@@ -48,6 +50,7 @@
            bind-public-class-fields
            bind-private-class-fields
            bind-public-class-methods
+           bind-private-class-methods
            (define (meta-dispatch meta-msg)
              (case meta-msg
                ((name) class-name)

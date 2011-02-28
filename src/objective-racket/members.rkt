@@ -52,3 +52,11 @@
    '(public static method))
   (binder common-method-binder)
   (caller common-method-caller))
+
+(def-member-qualifier 
+  private-class-method
+  (matcher
+   '(private static method method-name method-params method-body *ldots*)
+   '(private static method))
+  (binder common-method-binder)
+  (caller common-method-caller))
