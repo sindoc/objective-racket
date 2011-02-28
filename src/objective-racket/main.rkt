@@ -32,7 +32,7 @@
           (members-db-add+ (member-object 'scope) member-object))
         (syntax->list #'members)))
      (with-syntax
-         ((bind-class-fields
+         ((bind-class-members
            (gen-member get-binder 'static))
           (object 
            (make-id #'class "~a-instance" #'class))
@@ -46,7 +46,7 @@
            (define (init-meta)
              (set! meta meta-dispatch)
              meta)
-           bind-class-fields
+           bind-class-members
            (define (object)
              (define self null)
              (define (init-object)
