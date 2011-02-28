@@ -12,9 +12,12 @@
 (define-for-syntax (gen-member proc key #:wrapper [wrap #'begin])
   #`(#,wrap #,@(members-db-map+ key proc)))
 
-(define-for-syntax (field-dispatcher mo)
+(define-for-syntax (field-dispatcher member-object)
   (let ((ref (mo 'caller)))
     #`((#,ref) #,ref)))
+
+(define (get-binder member-object)
+  (mo 'binder))
 
 (define-syntax (defclass stx)
   (syntax-case stx ()
@@ -27,11 +30,11 @@
         (syntax->list #'members)))
      (with-syntax
          ((bind-public-class-fields
-            (gen-member (λ (mo) (mo 'binder)) 'public-class-field))
+            (gen-member get-binder 'public-class-field))
           (bind-private-class-fields
-            (gen-member (λ (mo) (mo 'binder)) 'private-class-field))
+            (gen-member get-binder 'private-class-field))
           (bind-public-class-methods
-           (gen-member (λ (mo) (mo 'binder)) 'public-class-method))
+           (gen-member get-binder 'public-class-method))
           (meta-dispatch 
            (make-id #'class "dispatch-~a" #'class))
           (class-name #''class))
