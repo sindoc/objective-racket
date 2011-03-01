@@ -29,11 +29,14 @@
         (λ (member)
           (define member-object (qualify-member member))
           (members-db-add+ (member-object 'name) member-object)
-          (members-db-add+ (member-object 'scope) member-object))
+          (let ((scope (if (member-object 'meta-member?) 'class 'object)))
+            (members-db-add+ scope member-object)))
         (syntax->list #'members)))
      (with-syntax
          ((bind-class-members
-           (gen-member get-binder 'static))
+           (gen-member get-binder 'class))
+          (bind-instance-members
+           (gen-member get-binder 'object))
           (object 
            (make-id #'class "~a-instance" #'class))
           (object-dispatch
@@ -47,14 +50,19 @@
              (set! meta meta-dispatch)
              meta)
            bind-class-members
-           (define (object)
+           (define (reify)
              (define self null)
              (define (init-object)
                (set! self object-dispatch)
                self)
+             bind-instance-members
              (define (object-dispatch msg)
                (case msg
                  ((meta) meta)
+                 #,@(members-db-map+ 
+                     'public-instance-field field-dispatcher)
+                 #,@(members-db-map+ 
+                     'public-instance-method field-dispatcher)
                  (else
                   (error 
                    class-name "unknown message ~a to an instance of ~a" 
@@ -63,6 +71,7 @@
            (define (meta-dispatch meta-msg)
              (case meta-msg
                ((name) class-name)
+               ((reify) (reify))
                #,@(members-db-map+ 'public-class-field field-dispatcher)
                #,@(members-db-map+ 'public-class-method field-dispatcher)
                (else

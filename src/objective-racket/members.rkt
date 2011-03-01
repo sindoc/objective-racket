@@ -60,3 +60,37 @@
    '(private static method))
   (binder common-method-binder)
   (caller common-method-caller))
+
+(def-member-qualifier
+  public-instance-field
+  (matcher
+   '(field var-name)
+   '(field))
+  (binder 
+   (λ (stx)
+     (syntax-case stx ()
+       ((_ var-name)
+        #'(define var-name null)))))
+  (caller
+   (λ (stx)
+     (syntax-case stx ()
+       ((_ var-name)
+        #'var-name)))))
+
+(def-member-qualifier
+  public-instance-method
+  (matcher
+   '(method name params body *ldots*)
+   '(method))
+  (caller
+   (λ (stx)
+     (syntax-case stx ()
+       ((_ name _ ...)
+        #'name))))
+  (binder
+   (λ (stx)
+     (syntax-case stx ()
+       ((_ name params body ...)
+        #'(define name
+            (λ params
+              body ...)))))))

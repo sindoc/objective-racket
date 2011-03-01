@@ -56,7 +56,8 @@
                (case msg
                  ((name) qualifier-name)
                  ((member) member)
-                 ((scope) (cadr (syntax->datum member)))
+                 ((meta-member?) 
+                  (eq? (cadr (syntax->datum member)) 'static))
                  ((action-id)
                   (datum->syntax
                    member
